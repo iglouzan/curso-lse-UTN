@@ -1,17 +1,17 @@
 #include "tareas.h"
 
-// -------
+//
 // Colas |
-// -------
+//
 QueueHandle_t queue_adc;              // Cola para datos del ADC
 QueueHandle_t queue_display;          // Cola para datos del display
 QueueHandle_t queue_display_variable; // Cola para variable a mostrar en el display
 QueueHandle_t queue_lux;              // cola para datos de lux (porcentaje)
 QueueHandle_t queue_lux_raw;          // cola para datos de lux (valor bruto)
 
-// ----------
+//
 // Semaforo |
-// ----------
+//
 xSemaphoreHandle semphr_buzz; // Interrupción del Sensor IR
 xSemaphoreHandle semphr_usr;  // Boton de USER
 
@@ -21,9 +21,9 @@ TaskHandle_t DisplayHandler;
 // Setpoint
 float setpoint = 50.0f;
 
-// --------------------------
+//
 // Definición de las tareas |
-// --------------------------
+//
 
 // Tarea 0: Inicialización de periféricos y recursos
 void tsk_init(void *params)
@@ -68,9 +68,9 @@ void tsk_init(void *params)
     vTaskDelete(NULL);
 }
 
-// ---------------
+//
 // Tarea 1: ADC  |
-// ---------------
+//
 void tsk_adc(void *params)
 {
 
@@ -83,9 +83,9 @@ void tsk_adc(void *params)
     }
 }
 
-// ---------------------------------------
+//
 // Tarea 2: Control del botón de usuario |
-// ---------------------------------------
+//
 void tsk_display_change(void *params)
 {
     // Dato para pasar
@@ -102,9 +102,9 @@ void tsk_display_change(void *params)
     }
 }
 
-// --------------------------------
+//
 // Tarea 3: Escribe en el display |
-// --------------------------------
+//
 void tsk_control(void *params)
 {
     // Variable a mostrar
@@ -145,9 +145,9 @@ void tsk_control(void *params)
     }
 }
 
-// ----------------------------------------
+//
 // Tarea 4: Escribe un numero en el display
-// ----------------------------------------
+//
 void tsk_display_write(void *params)
 {
     // Variable con el dato para escribir
@@ -174,9 +174,9 @@ void tsk_display_write(void *params)
     }
 }
 
-// --------------------------
+//
 // Tarea 5: Sensor BH1750
-// --------------------------
+//
 void tsk_BH1750(void *params)
 {
     // Valor de intensidad luminica
@@ -202,9 +202,9 @@ void tsk_BH1750(void *params)
     }
 }
 
-// ------------------------------------
+//
 // Tarea 6: Control de LED Azul con RV22
-// ------------------------------------
+//
 void tsk_led_azul(void *params)
 {
     adc_data_t adc_data;
@@ -225,9 +225,9 @@ void tsk_led_azul(void *params)
     }
 }
 
-// --------------------------
+//
 // Tarea 7: Setpoint
-// --------------------------
+//
 void tsk_setpoint(void *params)
 {
     while (1)
@@ -256,9 +256,32 @@ void tsk_setpoint(void *params)
     }
 }
 
-// --------------------------
+
+void task_buzzer(void *params) {
+
+	while(1){
+		
+		if(!GPIO_PinRead(CNY70)) {
+			vTaskDelay(pdMS_TO_TICKS(50));
+			if(GPIO_PinRead(CNY70)) {
+				// Flanco ascendente
+				wrapper_output_toggle((gpio_t){BUZZER});
+			}
+		} else {
+			vTaskDelay(pdMS_TO_TICKS(50));
+			if(!GPIO_PinRead(CNY70)) {
+				// Flanco descendente
+				wrapper_output_toggle((gpio_t){BUZZER});
+			}
+		}
+
+		vTaskDelay(pdMS_TO_TICKS(1));
+	}
+}
+
+//
 // Tarea 8: Buzzer
-// --------------------------
+//
 void tsk_buzzer(void *params)
 {
     while (1)
@@ -272,9 +295,9 @@ void tsk_buzzer(void *params)
     }
 }
 
-// --------------------------
+//
 // Tarea 9: LEDs tricolor
-// --------------------------
+//
 void tsk_leds_control(void *params)
 {
     float lux_pct = 0;
@@ -324,9 +347,9 @@ void tsk_leds_control(void *params)
     }
 }
 
-// --------------------------
+//
 // Tarea 10: Monitor de consola
-// --------------------------
+//
 void tsk_console_monitor(void *params)
 {
     TickType_t xLastWakeTime = xTaskGetTickCount();
