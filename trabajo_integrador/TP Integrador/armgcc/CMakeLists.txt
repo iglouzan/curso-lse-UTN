@@ -14,6 +14,9 @@ if(CMAKE_SCRIPT_MODE_FILE)
 endif()
 
 
+set(CMAKE_STATIC_LIBRARY_PREFIX)
+set(CMAKE_STATIC_LIBRARY_SUFFIX)
+
 set(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 set(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
@@ -52,15 +55,24 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 "${ProjDirPath}/../clock_config.c"
 "${ProjDirPath}/../hardware_init.c"
 "${ProjDirPath}/../app.h"
-"${ProjDirPath}/../mcux_config.h"
+"${ProjDirPath}/../labels.h"
+"${ProjDirPath}/../tareas.h"
+"${ProjDirPath}/../tareas.c"
+"${ProjDirPath}/../wrappers.h"
+"${ProjDirPath}/../wrappers.c"
+"${ProjDirPath}/../isr.h"
+"${ProjDirPath}/../isr.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${ProjDirPath}/..
+    ${SdkRootDirPath}/devices/LPC845/drivers
 )
 
 
 include(${SdkRootDirPath}/devices/LPC845/all_lib_device.cmake)
+
+add_subdirectory(${ProjDirPath}/../../freertos ${CMAKE_BINARY_DIR}/freertos)
 
 IF(NOT DEFINED TARGET_LINK_SYSTEM_LIBRARIES)  
     SET(TARGET_LINK_SYSTEM_LIBRARIES "-lm -lc -lgcc -lnosys")  
@@ -70,7 +82,7 @@ TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE ${TARGET_LINK_SYSTEM_LIBRARIES})
 
-TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
+TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE freertos -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
 -Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/new_project.bin)
@@ -79,4 +91,3 @@ set_target_properties(${MCUX_SDK_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES
 
 # wrap all libraries with -Wl,--start-group -Wl,--end-group to prevent link order issue
 group_link_libraries()
-
