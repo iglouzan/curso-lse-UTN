@@ -83,7 +83,8 @@ void wrapper_gpio_enable_irq(gpio_t gpio, pint_pin_enable_t edge, pint_cb_t call
     // Asigno el pin a la interrupción
     SYSCON->PINTSEL[pint_n] = wrapper_gpio_get_pin(gpio);
     // PINT interrupt para el flanco indicado
-    PINT_PinInterruptConfig(PINT, (pint_pin_int_t)pint_n, edge, callback);
+    PINT_PinInterruptConfig(PINT, (pint_pin_int_t)pint_n, edge);
+    PINT_SetCallback(PINT, callback);
     PINT_EnableCallbackByIndex(PINT, (pint_pin_int_t)pint_n++);
 }
 
